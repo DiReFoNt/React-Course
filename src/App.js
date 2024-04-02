@@ -1,8 +1,11 @@
-import React, { useRef, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import "./styles/App.css";
 import PostList from "./components/PostList";
 import PostForm from "./components/PostForm";
-import MySelect from "./components/UI/select/MySelect";
+
+import PostFilter from "./components/PostFilter";
+import MyModal from "./components/UI/MyModal/MyModal";
+import MyButton from "./components/UI/button/MyButton";
 
 function App() {
     const [posts, setPosts] = useState([
@@ -11,41 +14,49 @@ function App() {
         { id: 3, title: "aa 3", body: "Description" },
     ]);
 
-    const [selectedSort, setSelectedSort] = useState("");
+    const [filter, setFilter] = useState({ sort: "", query: "" });
+    const [modal, setModal] = useState(false);
+
+    const sortedPosts = useMemo(() => {
+        console.log("Work");
+        if (filter.sort) {
+            return [...posts].sort((a, b) =>
+                a[filter.sort].localeCompare(b[filter.sort])
+            );
+        }
+        return posts;
+    }, [filter.sort, posts]);
+
+    const sortedAndSearchPosts = useMemo(() => {
+        return sortedPosts.filter((post) =>
+            post.title.toLowerCase().includes(filter.query)
+        );
+    }, [filter.query, sortedPosts]);
 
     const createPost = (newPost) => {
         setPosts([...posts, newPost]);
+        setModal(false);
     };
 
     const removePost = (post) => {
         setPosts(posts.filter((p) => p.id !== post.id));
     };
 
-    const sortPosts = (sort) => {
-        console.log(sort);
-        setPosts([...posts].sort((a, b) => a[sort].localeCompare(b[sort])));
-    };
-
     return (
         <div className="App">
-            <PostForm create={createPost} />
+            <MyButton style={{ marginTop: 30 }} onClick={() => setModal(true)}>
+                Create Post
+            </MyButton>
+            <MyModal visible={modal} setVisible={setModal}>
+                <PostForm create={createPost} />
+            </MyModal>
             <hr style={{ margin: "15px 0" }} />
-            <div>
-                <MySelect
-                    value={selectedSort}
-                    onChange={sortPosts}
-                    defaultValue="Sort by"
-                    options={[
-                        { value: "title", name: "For name" },
-                        { value: "body", name: "For description" },
-                    ]}
-                />
-            </div>
-            {posts.length !== 0 ? (
-                <PostList remove={removePost} posts={posts} title="Posts JS" />
-            ) : (
-                <h1 style={{ textAlign: "center" }}>Posts not fiend</h1>
-            )}
+            <PostFilter filter={filter} setFilter={setFilter} />
+            <PostList
+                remove={removePost}
+                posts={sortedAndSearchPosts}
+                title="Posts JS"
+            />
         </div>
     );
 }
