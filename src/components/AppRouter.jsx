@@ -1,33 +1,47 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { publicRoutes, privateRoutes } from "../router";
+import { AuthContext } from "../context";
 
 const AppRouter = () => {
-    const isAuth = false;
+    const { isAuth } = useContext(AuthContext);
     return (
-        <Routes>
+        <div>
             {isAuth
                 ? privateRoutes.map((router) => {
                       return (
-                          <Route
-                              element={<router.component />}
-                              path={router.path}
-                              exact={router.exact}
-                          />
+                          <Routes>
+                              <Route
+                                  element={<router.component />}
+                                  path={router.path}
+                                  exact={router.exact}
+                                  key={router.path}
+                              />
+                              <Route
+                                  path="*"
+                                  element={<Navigate to="/posts" />}
+                              />
+                          </Routes>
                       );
                   })
                 : publicRoutes.map((router) => {
                       return (
-                          <Route
-                              element={<router.component />}
-                              path={router.path}
-                              exact={router.exact}
-                          />
+                          <Routes>
+                              <Route
+                                  element={<router.component />}
+                                  path={router.path}
+                                  exact={router.exact}
+                                  key={router.path}
+
+                              />
+                              <Route
+                                  path="*"
+                                  element={<Navigate to="/login" />}
+                              />
+                          </Routes>
                       );
                   })}
-
-            <Route path="*" element={<Navigate to="/login" />} />
-        </Routes>
+        </div>
     );
 };
 
