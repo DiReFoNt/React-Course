@@ -2,9 +2,15 @@ import React, { useContext } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { publicRoutes, privateRoutes } from "../router";
 import { AuthContext } from "../context";
+import Loader from "./UI/Loader/Loader";
 
 const AppRouter = () => {
-    const { isAuth } = useContext(AuthContext);
+    const { isAuth, isLoading } = useContext(AuthContext);
+
+    if (isLoading) {
+        return <Loader />;
+    }
+
     return (
         <div>
             {isAuth
@@ -18,7 +24,6 @@ const AppRouter = () => {
                                   key={router.path}
                               />
                               <Route
-                                  path="*"
                                   element={<Navigate to="/posts" />}
                               />
                           </Routes>
@@ -32,7 +37,6 @@ const AppRouter = () => {
                                   path={router.path}
                                   exact={router.exact}
                                   key={router.path}
-
                               />
                               <Route
                                   path="*"
